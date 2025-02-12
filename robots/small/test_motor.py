@@ -9,7 +9,7 @@ import smbus2
 from typing import Optional
 
 # I2C configuration
-BASE_FOLLOWER_ADDRESS = 0x7A
+MOTOR_ADDRESS = 0x7A
 
 # Motor IDs
 FRONT_LEFT_MOTOR = 1
@@ -27,7 +27,7 @@ class TurboPi:
             bus_number: I2C bus number (default: 1)
         """
         self.bus = smbus2.SMBus(bus_number)
-        self.address = BASE_FOLLOWER_ADDRESS
+        self.address = MOTOR_ADDRESS
 
     def set_motor_speed(self, motor_id: int, speed: int) -> None:
         """Set the speed of a specific motor
