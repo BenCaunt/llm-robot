@@ -20,11 +20,11 @@ REAR_RIGHT_MOTOR = 4
 class TurboPi:
     """Simple control interface for TurboPi robot"""
     
-    def __init__(self, bus_number: int = 1):
+    def __init__(self, bus_number: int = 11):
         """Initialize TurboPi controller
         
         Args:
-            bus_number: I2C bus number (default: 1)
+            bus_number: I2C bus number (default: 11)
         """
         self.bus = smbus2.SMBus(bus_number)
         self.address = MOTOR_ADDRESS
