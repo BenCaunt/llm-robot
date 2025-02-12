@@ -9,7 +9,7 @@ import smbus2
 from typing import Optional
 
 # I2C configuration
-MOTOR_ADDRESS = 0x7A
+MOTOR_ADDRESS = 31
 
 # Motor IDs
 FRONT_LEFT_MOTOR = 1
