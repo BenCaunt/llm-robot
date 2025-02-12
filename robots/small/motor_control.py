@@ -62,9 +62,9 @@ def main():
     parser = argparse.ArgumentParser(
         description="Standalone motor control script for the turbopi robot (non-ROS)."
     )
-    parser.add_argument("--bus", type=int, default=1,
-                        help="I2C bus number (default: 1)")
-    parser.add_argument("--device", type=lambda x: int(x, 0), default="0x40",
+    parser.add_argument("--bus", type=int, default=11,
+                        help="I2C bus number (default: 11)")
+    parser.add_argument("--device", type=lambda x: int(x, 0), default="30",
                         help="I2C device/slave address of the motor board in hex (default: 0x40)")
     parser.add_argument("--motor", type=int, required=True,
                         help="Motor ID (1-indexed)")
