@@ -20,7 +20,7 @@ REAR_RIGHT_MOTOR = 4
 class TurboPi:
     """Simple control interface for TurboPi robot"""
     
-    def __init__(self, bus_number: int = 11):
+    def __init__(self, bus_number: int = 12):
         """Initialize TurboPi controller
         
         Args:
