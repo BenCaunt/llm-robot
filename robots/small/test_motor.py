@@ -69,6 +69,7 @@ class TurboPi:
 
 if __name__ == "__main__":
     turbo = TurboPi()
+    time.sleep(1)
     turbo.drive(100, 100)
     time.sleep(1)
     turbo.drive(0, 0)
