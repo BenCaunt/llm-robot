@@ -15,6 +15,7 @@ dependencies = [
     "eclipse-zenoh",
     "click>=8.0.0",
     "smbus2>=0.4.3",
+    "mcp[cli]",
 ]
 
 [project.scripts]
