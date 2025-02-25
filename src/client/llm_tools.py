@@ -34,7 +34,10 @@ def turn_in_place(power: float, duration: float):
 
     Out door open areas can go up to 1.0 though this often doesn't make a lot of sense. 
     """
-    os.system(f"python actions/DriveForDuration/turn.py --power {power} --duration {duration}")
+    if os.system(f"python actions/DriveForDuration/turn.py --power {power} --duration {duration}") != 0:
+        raise Exception("Failed to turn in place")
+    return "success!"
+    
 
 def steer_to_object(object_description: str, timeout: float): 
     """
@@ -46,12 +49,16 @@ def steer_to_object(object_description: str, timeout: float):
     Uses a small VLM to accomplish this, usually fairly accurate.  
 
     Sometimes oscillates so a timeout of 5 seconds is usually a good minimum.  
-    """
-    os.system(f"python actions/MoondreamObjectTracking/servoing_example.py --prompt \"{object_description}\" --timeout {timeout}")
 
-def get_current_frame(timeout: float = 5.0, image_format: str = "jpeg", max_size: int = 800):
+    Ideally by the time this function completes the object will be in the center of the frame.  Driving forward should then move the robot towards the object.  
     """
-    Get the current camera frame from the robot.
+    if os.system(f"python actions/MoondreamObjectTracking/servoing_example.py --prompt \"{object_description}\" --timeout {timeout}") != 0:
+        raise Exception("Failed to steer to object")
+    return "success!"
+
+def get_current_frame():
+    """
+    Get the current camera frame from the robot. Facing forward along the +x local frame axis.  
     
     Args:
         timeout: Maximum time to wait for a frame in seconds
@@ -64,7 +71,13 @@ def get_current_frame(timeout: float = 5.0, image_format: str = "jpeg", max_size
     Raises:
         TimeoutError: If no frame is received within the timeout period
     """
+
+    timeout = 5.0
+    image_format = "jpeg"
+    max_size = 800
+
     # Initialize variables to store the frame
+
     latest_frame = None
     frame_received = False
     frame_lock = threading.Lock()
@@ -126,4 +139,70 @@ def get_current_frame(timeout: float = 5.0, image_format: str = "jpeg", max_size
     img_str = base64.b64encode(buffered.getvalue()).decode()
     
     return img_str
+
+tools = [
+    {
+        "name": "drive_straight",
+        "description": "Drive the robot forward at the given power for the given duration. Due to being on real hardware it may not travel perfectly straight.  Usecases: Moving to an object, moving to a location, etc.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "power": {
+                    "type": "number",
+                    "description": "Normalized float [-1, 1] where +1 is forward in the camera frame. Generally a safe speed is about 0.3. If you are in a very open setting you can go up to 0.5. Outdoor open areas can go up to 1.0."
+                },
+                "duration": {
+                    "type": "number",
+                    "description": "Duration in seconds to drive the robot."
+                }
+            },
+            "required": ["power", "duration"]
+        }
+    },
+    {
+        "name": "turn_in_place",
+        "description": "Turn the robot in place at the given power for the given duration.  Usecases: Turning to face an object, turning to navigate around an object, panning to find something if it isn't currently visible.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "power": {
+                    "type": "number",
+                    "description": "Normalized float [-1, 1] where +1 is counter-clockwise (to the left) in the camera frame. Generally a safe speed is about 0.3. If you are in a very open setting you can go up to 0.5. Outdoor open areas can go up to 1.0."
+                },
+                "duration": {
+                    "type": "number",
+                    "description": "Duration in seconds to turn the robot."
+                }
+            },
+            "required": ["power", "duration"]
+        }
+    },
+    {
+        "name": "steer_to_object",
+        "description": "Steer the robot to the given object. Uses a small VLM to accomplish this, usually fairly accurate. Sometimes oscillates so a timeout of 5 seconds is usually a good minimum. Ideally by the time this function completes the object will be in the center of the frame.  This only works if the object is currently visible.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "object_description": {
+                    "type": "string",
+                    "description": "String description of the object we want to steer to."
+                },
+                "timeout": {
+                    "type": "number",
+                    "description": "Seconds we wait until we stop and the function will return."
+                }
+            },
+            "required": ["object_description", "timeout"]
+        }
+    },
+    {
+        "name": "get_current_frame",
+        "description": "Get the current camera frame from the robot. Facing forward along the +x local frame axis. Returns a base64-encoded string of the image that can be sent to an LLM.",
+        "input_schema": {
+            "type": "object",
+            "properties": {},
+            "required": []
+        }
+    }
+]
 
