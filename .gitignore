@@ -29,3 +29,6 @@ wheels/
 .vscode/
 *.swp
 *.swo 
+
+api_key.txt
+anthropic_api_key.txt
