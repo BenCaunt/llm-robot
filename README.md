@@ -1,35 +1,61 @@
-# LLM Robot
+# Mobile Robot Agent with Gemini
 
-An opinionated robotics framework built on zenoh.
+This project implements an autonomous mobile robot agent powered by Google Gemini that can:
+- Navigate through an environment using vision
+- Find and track specific objects
+- Execute multi-step tasks based on natural language instructions
 
-## Installation
+## Setup Requirements
 
-```bash
-pip install -e .
-```
+1. Install required packages:
+   ```
+   pip install -r requirements.txt
+   ```
+
+2. Set the GOOGLE_API_KEY environment variable with your Google API key:
+   ```
+   export GOOGLE_API_KEY=your_api_key_here
+   ```
+
+3. Ensure the robot hardware is properly connected and operational.
 
 ## Usage
 
-To read from the zenoh network:
+1. Run the interface script:
+   ```
+   python src/client/llm_interface.py
+   ```
 
-```bash
-llm-robot read
-```
+2. Enter a task in natural language (e.g., "find my black backpack")
 
-To connect to a specific zenoh peer:
+3. The robot will autonomously work to complete the task
 
-```bash
-llm-robot read --connect tcp/192.168.1.1:7447
-```
+4. You can provide follow-up instructions or start new tasks
 
-## Project Structure
+## How It Works
 
-- `src/llm_robot/`: Main package
-  - `cli.py`: Command-line interface
-  - `models/`: Data structure definitions
-- `robots/`: Robot implementations
-  - `small/`: Small robot package
+- The system uses Gemini to interpret tasks and make decisions
+- Gemini calls robot control functions (drive, turn, steer) as needed
+- The robot continuously captures camera frames to update Gemini
+- Gemini plans and executes a sequence of actions to complete the task
 
-## Development
+## Available Tools
 
-This project uses `pyproject.toml` for dependency management. Make sure you have Python 3.8 or newer installed. 
+1. **drive_straight** - Move forward/backward at a specified power for a duration
+2. **turn_in_place** - Rotate left/right at a specified power for a duration
+3. **steer_to_object** - Center the camera on a specified object
+4. **get_current_frame** - Get the current camera view
+
+## Example Tasks
+
+- "Find my black backpack"
+- "Navigate to the kitchen"
+- "Look for a red chair"
+- "Explore the room"
+
+## Troubleshooting
+
+If you encounter rate limiting issues with the Gemini API:
+1. Check your API usage in the Google AI Studio dashboard
+2. Consider upgrading your API tier if needed
+3. Implement exponential backoff for retries in case of rate limiting errors 
