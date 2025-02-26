@@ -8,7 +8,7 @@ import base64
 from io import BytesIO
 from PIL import Image
 
-def drive_straight(power: float, duration: float):
+def drive_straight(power: float, duration: float) -> str:
     """
     Drive the robot forward at the given power for the given duration.
     power: normalized float [-1, 1] where +1 is forward in the camera frame. 
@@ -20,15 +20,19 @@ def drive_straight(power: float, duration: float):
 
     Due to being on real hardware it may not travel perfectly straight. 
 
+    driving forward at 0.4 power for 1 second is approximately 1 meter.
+
     Returns: 
     """
     os.system(f"python actions/DriveForDuration/drive.py --power {power} --duration {duration}")
 
-def turn_in_place(power: float, duration: float):
+def turn_in_place(power: float, duration: float) -> str:
     """
     Turn the robot in place at the given power for the given duration.
     power: normalized float [-1, 1] where +1 is counter-clockwise (to the left) in the camera frame.
     duration: seconds
+
+    a power of 0.4 for 0.6 seconds is approximately 90 degrees.
 
     Generally a safe speed is about 0.3.  If you are in a very open setting you can go up to 0.5.
 
@@ -39,7 +43,7 @@ def turn_in_place(power: float, duration: float):
     return "success!"
     
 
-def steer_to_object(object_description: str, timeout: float): 
+def steer_to_object(object_description: str, timeout: float) -> str: 
     """
     Steer the robot to the given object.
     object_description: string description of the object we want to steer to. 
@@ -57,6 +61,7 @@ def steer_to_object(object_description: str, timeout: float):
     return "success!"
 
 def get_current_frame():
+    print("getting current frame called!!!!")
     """
     Get the current camera frame from the robot. Facing forward along the +x local frame axis.  
     
@@ -132,13 +137,14 @@ def get_current_frame():
     
     # Convert to PIL Image
     pil_img = Image.fromarray(frame_rgb)
+    return pil_img
     
-    # Encode to base64
-    buffered = BytesIO()
-    pil_img.save(buffered, format=image_format.upper())
-    img_str = base64.b64encode(buffered.getvalue()).decode()
+    # # Encode to base64
+    # buffered = BytesIO()
+    # pil_img.save(buffered, format=image_format.upper())
+    # img_str = base64.b64encode(buffered.getvalue()).decode()
     
-    return img_str
+    # return img_str
 
 tools = [
     {
@@ -195,14 +201,27 @@ tools = [
             "required": ["object_description", "timeout"]
         }
     },
-    {
-        "name": "get_current_frame",
-        "description": "Get the current camera frame from the robot. Facing forward along the +x local frame axis. Returns a base64-encoded string of the image that can be sent to an LLM.",
-        "input_schema": {
-            "type": "object",
-            "properties": {},
-            "required": []
-        }
-    }
+    # currently not a tool because it is just added to the prompt each time. 
+    # {
+    #     "name": "get_current_frame",
+    #     "description": "Get the current camera frame from the robot. Facing forward along the +x local frame axis. Returns a base64-encoded string of the image that can be sent to an LLM.",
+    #     "input_schema": {
+    #         "type": "object",
+    #         "properties": {},
+    #         "required": []
+    #     }
+    # }
 ]
 
+def generate_system_prompt(task_description: str) -> str:
+    system_prompt = f"""
+    You are a mobile robot tasked with doing some task in an environment.  You have a camera and can drive around with the commands provided. 
+    Often times the objective will not be immediately visible, you may need to explore the enviornment to find it. Keep track of where you are and where you need to go.
+    You will be responsible for object avoidance, if you expect you should have moved a large distance but haven't you might be stuck, you can backup and turn to get a different angle. 
+    The turn to object tool is only useful if the object is currently visible, do not try to use it if the object is not visible. 
+
+    You have the following tools:
+    {tools}
+
+    """
+    return [system_prompt + f" your task is: {task_description}", get_current_frame()]
