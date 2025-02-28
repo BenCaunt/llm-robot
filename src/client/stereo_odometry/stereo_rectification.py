@@ -3,7 +3,7 @@ import numpy as np
 from PIL import Image
 import cv2
 
-from stereo_calibration import read_calibration
+from calib.stereo_calibration import read_calibration
 try:
     # Try absolute import first
     from src.client.camera_access.ZenohCamera import ZenohCamera
@@ -89,7 +89,7 @@ class StereoRectifier:
         if self.visualize:
             self._visualize_rectification(left_rectified, right_rectified, stereo_image)
         
-        return left_rectified, right_rectified
+        return left_rectified, right_rectified, left_undistorted, right_undistorted
     
     def _split_stereo_image(self, image):
         """Split a stereo image into left and right images."""

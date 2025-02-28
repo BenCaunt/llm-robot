@@ -4,7 +4,7 @@ Test script to demonstrate how to use the read_calibration function
 from the stereo_calibration module.
 """
 
-from stereo_calibration import read_calibration
+from calib.stereo_calibration import read_calibration
 import numpy as np
 
 def main():
