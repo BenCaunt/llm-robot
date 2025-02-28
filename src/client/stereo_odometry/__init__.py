@@ -1,0 +1,1 @@
+# Make stereo_odometry a proper Python package 
